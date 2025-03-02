@@ -18,6 +18,34 @@ MemBlock *initBlock(char owner, int size) {
   return newBlock;
 }
 
+MemBlock *initHole(int size) {
+  MemBlock *newBlock = (MemBlock *)malloc(sizeof(MemBlock));
+  if (newBlock == NULL) {
+    printf("initBlock ERROR: Failed to allocate memory for MemBlock.\n");
+    return NULL;
+  }
+
+  newBlock->owner = HOLE;
+  newBlock->size = size;
+  newBlock->next = NULL;
+
+  return newBlock;
+}
+
+// Set owner to HOLE.
+// If MemBlock after is a hole, merge the two.
+void convertToHole(MemBlock *block) {
+  block->owner = HOLE;
+
+  if (block->next && block->next->owner == HOLE) {
+    block->size += block->next->size;
+
+    MemBlock *to_del = block->next;
+    block->next = block->next->next;
+    free(to_del);
+  }
+}
+
 // ==============
 // List Functions
 // --------------
@@ -44,12 +72,12 @@ void insertAfter(MemBlock *prevBlock, MemBlock *newBlock) {
   prevBlock->next = newBlock;
 }
 
-bool insertAfterIfFit(MemBlock *prevBlock, MemBlock *newBlock) {
-  if (!prevBlock->next || prevBlock->next->owner != NULL) {
+bool fitAfter(MemBlock *prevBlock, MemBlock *newBlock) {
+  if (!prevBlock->next || prevBlock->next->owner != HOLE) {
     return false; // Next space DNE or is owned by a process.
   }
   if (prevBlock->next->size < newBlock->size) {
-    return false; // Not enough free space
+    return false; // Not enough free space.
   }
 
   prevBlock->next->size -= newBlock->size;
@@ -57,11 +85,47 @@ bool insertAfterIfFit(MemBlock *prevBlock, MemBlock *newBlock) {
   return true;
 }
 
+// "Inserts" new memory block "above" the hole if
+// the hole has enough space to fit the new block into.
+// If they're the same size, the newBlock pointer will be freed!
+bool fitIntoHole(MemBlock *hole, MemBlock *newBlock) {
+  if (!hole || hole->owner != HOLE) {
+    return false;
+  }
+  if (!newBlock || newBlock->owner == HOLE) {
+    return false;
+  }
+
+  if (hole->size < newBlock->size) {
+    return false;
+  }
+
+  // Swap info, since we can't access node before hole.
+  char owner = newBlock->owner;
+  int size = newBlock->size;
+
+  newBlock->owner = HOLE;
+  newBlock->size = hole->size - size;
+
+  hole->owner = owner;
+  hole->size = size;
+
+  if (newBlock->size > 0) {
+    newBlock->next = hole->next;
+    hole->next = newBlock;
+
+  } else {
+    free(newBlock);
+  }
+
+  return true;
+}
+
 void printOwners(MemBlock *head) {
   MemBlock *it = head;
   while (it != NULL) {
     // Print owner name, or '.' if none.
-    printf(it->owner == NULL ? "." : it->owner);
+    printf(it->owner == HOLE ? "." : it->owner);
 
     it = it->next;
   }
