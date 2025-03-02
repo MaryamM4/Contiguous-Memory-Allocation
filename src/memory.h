@@ -1,12 +1,31 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "mem_list.h"
+
+#define KByte 1024           // bytes
+#define MEMSIZE (80 * KByte) // KBytes
+
 typedef char ProcessName;
 
 typedef enum { FIRST_FIT = 'F', BEST_FIT = 'B', WORST_FIT = 'W' } Algo;
 
+// Global Head for memory list.
+extern MemBlock *g_head;
+extern MemBlock *waiting_queue;
+
 // Alocate <size> bytes for process <p_name> using algorithm <algo>.
 void allocate(ProcessName p_name, int size, Algo algo);
+
+// ALLOCATION METHODS:
+void allocateFirstFit(MemBlock *block); // First hole that fits.
+void allocateBestFit(MemBlock *block);  // Smallest hole that fits.
+void allocateWorstFit(MemBlock *block); // Largest hole that fits.
+
+// @TODO later.
+// Since process memory must remain contigous, cannot split allocation.
+// Can instead add to a waiting queue, which we will ignore for now.
+void addToWaitingQueue(MemBlock *block); // If no hole fits & size <= MEMSIZE.
 
 // Free all the allocations owned by process <p_name>.
 void free(ProcessName p_name);

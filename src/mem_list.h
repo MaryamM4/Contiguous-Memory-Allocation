@@ -22,6 +22,8 @@ MemBlock *initBlock(char owner, int size);
 // List Functions
 // --------------
 
+void insertEnd(MemBlock *head, MemBlock *newBlock);
+
 void insertAfter(MemBlock *prevBlock, MemBlock *newBlock);
 
 // Only inserts new memory block after given previous block if

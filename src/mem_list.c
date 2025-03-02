@@ -22,6 +22,23 @@ MemBlock *initBlock(char owner, int size) {
 // List Functions
 // --------------
 
+void insertEnd(MemBlock *head, MemBlock *newBlock) {
+  if (!head) {
+    printf("insertEnd ERROR: Null list.");
+    return;
+  }
+  if (!newBlock) {
+    printf("insertEnd ERROR: Null new block.");
+    return;
+  }
+
+  MemBlock *it = head;
+  while (it->next != NULL) {
+    it = it->next;
+  }
+  it->next = newBlock;
+}
+
 void insertAfter(MemBlock *prevBlock, MemBlock *newBlock) {
   newBlock->next = prevBlock->next;
   prevBlock->next = newBlock;
