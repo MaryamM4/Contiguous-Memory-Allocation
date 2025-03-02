@@ -1,5 +1,9 @@
 #include "mem_list.h"
 
+// ==============
+// Node Functions
+// --------------
+
 MemBlock *initBlock(char owner, int size) {
   MemBlock *newBlock = (MemBlock *)malloc(sizeof(MemBlock));
   if (newBlock == NULL) {
@@ -13,6 +17,10 @@ MemBlock *initBlock(char owner, int size) {
 
   return newBlock;
 }
+
+// ==============
+// List Functions
+// --------------
 
 void insertAfter(MemBlock *prevBlock, MemBlock *newBlock) {
   newBlock->next = prevBlock->next;
@@ -32,7 +40,18 @@ bool insertAfterIfFit(MemBlock *prevBlock, MemBlock *newBlock) {
   return true;
 }
 
-void freeAll(MemBlock *head) {
+void printOwners(MemBlock *head) {
+  MemBlock *it = head;
+  while (it != NULL) {
+    // Print owner name, or '.' if none.
+    printf(it->owner == NULL ? "." : it->owner);
+
+    it = it->next;
+  }
+  printf("\n");
+}
+
+void freeList(MemBlock *head) {
   MemBlock *temp;
   while (head != NULL) {
     temp = head;

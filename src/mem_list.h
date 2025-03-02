@@ -12,7 +12,15 @@ typedef struct {
   MemBlock *next;
 } MemBlock;
 
+// ==============
+// Node Functions
+// --------------
+
 MemBlock *initBlock(char owner, int size);
+
+// ==============
+// List Functions
+// --------------
 
 void insertAfter(MemBlock *prevBlock, MemBlock *newBlock);
 
@@ -21,6 +29,9 @@ void insertAfter(MemBlock *prevBlock, MemBlock *newBlock);
 // If insert is succesful, will subtract from size of orignical nextBlock.
 bool insertAfterIfFit(MemBlock *prevBlock, MemBlock *newBlock);
 
-void freeAll(MemBlock *head);
+// (Replaced empty space with a '.')
+void printOwners(MemBlock *head);
+
+void freeList(MemBlock *head);
 
 #endif // MEMLIST_H
