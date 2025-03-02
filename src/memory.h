@@ -12,7 +12,7 @@ void allocate(ProcessName p_name, int size, Algo algo);
 void free(ProcessName p_name);
 
 // Show the state of the memory pool.
-void state();
+void show_state();
 
 // Read the script in the file and execute each command.
 // <filename> should end with ".txt", eg: "MEMO.TXT".
