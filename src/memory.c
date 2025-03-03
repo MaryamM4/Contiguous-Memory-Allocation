@@ -277,6 +277,7 @@ void compact() {
 void exit_mem() {
   freeList(g_head);
   freeList(waiting_queue);
+  exit(0);
 }
 
 int main(int argc, char *argv[]) {
