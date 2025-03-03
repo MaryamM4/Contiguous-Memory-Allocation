@@ -28,7 +28,10 @@ Please see https://github.com/MaryamM4/Contiguous-Memory-Allocation.git
     ![](docs/mem_list_representation.png)
 
 - When a process requests memory, the algorithm searches the list for a suitable hole.
-    Allocations split holes if necessary, while process deallocations convert allocated blocks back into holes and merge adjacent free blocks. A compaction routine shifts allocated blocks to the start of the pool, consolidating free space at the end.
+    Allocations split holes if necessary, 
+    while process deallocations convert allocated blocks back into holes and merge adjacent free blocks. 
+
+- Compaction shifts allocated blocks to the start of the pool and consolidates holes into a node at the end.
 
 
 ## Output
