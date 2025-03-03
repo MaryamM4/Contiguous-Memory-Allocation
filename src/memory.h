@@ -2,12 +2,22 @@
 #define MEMORY_H
 
 #include "mem_list.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define KByte 1024           // bytes
 #define MEMSIZE (80 * KByte) // KBytes
 
 typedef char ProcessName;
 
+typedef enum {
+  ALLOCATE = 'A',
+  FREE_PROCESS_ALLOCATIONS = 'F',
+  SHOW_MEM = 'S',
+  COMPACT_MEM = 'C',
+  EXIT = 'E'
+} Command;
 typedef enum { FIRST_FIT = 'F', BEST_FIT = 'B', WORST_FIT = 'W' } Algo;
 
 // Global Head for memory list.
@@ -35,7 +45,7 @@ void show_state();
 
 // Read the script in the file and execute each command.
 // <filename> should end with ".txt", eg: "MEMO.TXT".
-void read(char *filename);
+void read_script(char *filename);
 
 // Compact the memory pool, sliding all allocations to lower
 // addresses to they become one contigous block,

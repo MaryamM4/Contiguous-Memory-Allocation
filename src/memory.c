@@ -154,22 +154,109 @@ void show_state() {
 
 // Read the script in the file and execute each command.
 // <filename> should end with ".txt", eg: "MEMO.TXT".
-void read(char *filename);
+void read_script(char *filename) {
+  FILE *file = fopen(filename, "r");
+  if (!file) {
+    printf("read ERROR: Failed to open file %s.\n", filename);
+    return;
+  }
+
+  Command command;
+  char line[10]; // A line shouldn't be > 8
+
+  while (fgets(line, sizeof(line), file)) {
+    if (line[0] == '\n' || line[0] == '\r') {
+      continue; // Skip if empty..
+    }
+
+    if (sscanf(line, " %c", &command) != 1) {
+      continue;
+    }
+
+    switch (command) {
+    case ALLOCATE: {
+      char p_name, p_algo;
+      int count, p_size;
+
+      count = sscanf(line, " %*c %c %d %c", &p_name, &p_size, &p_algo);
+      if (count < 3) {
+        fprintf("read() Error parsing parameters for command A in line: %s\n",
+                line);
+        break;
+      }
+
+      allocate(p_name, p_size, p_algo);
+      break;
+    }
+
+    case FREE_PROCESS_ALLOCATIONS: {
+      char p_name;
+      int count = sscanf(line, " %*c %c", &p_name);
+
+      if (count < 1) {
+        fprintf("read() Error parsing parameters for command A in line: %s\n",
+                line);
+        break;
+      }
+
+      free(p_name);
+      break;
+    }
+
+    case SHOW_MEM:
+      show_state();
+      break;
+
+    case COMPACT_MEM:
+      compact();
+      break;
+
+    case EXIT:
+      exit();
+      break;
+
+    default:
+      fprintf("read() encountered unrecognized command: %c\n", command);
+      break;
+    }
+  }
+
+  fclose(file);
+}
 
 // Compact the memory pool, sliding all allocations to lower
 // addresses to they become one contigous block,
 // and so all free spaces lie the right as one contigous block.
 void compact() {
   MemBlock *it = g_head;
-  MemBlock *nonhole_tail;
+  MemBlock *to_del;
+  int hole_size = 0;
 
   while (it != NULL) {
-    nonhole_tail = it;
+    if (it->next == NULL) { // Reached end.
+      if (it->owner == HOLE) {
+        it->size += hole_size;
 
-    while (it->owner == HOLE) {
+      } else {
+        it->next = (MemBlock *)initHole(hole_size);
+      }
+      break;
+
+    } else { // Check for hole.
+
+      if (it->owner == HOLE) {
+        // Remember how much empty space is left.
+        hole_size += it->size;
+
+        // Remove hole.
+        to_del = it;
+        it = it->next;
+        free(to_del);
+
+      } else {
+        it = it->next;
+      }
     }
-
-    it = it->next;
   }
 }
 
