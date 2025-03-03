@@ -121,17 +121,6 @@ bool fitIntoHole(MemBlock *hole, MemBlock *newBlock) {
   return true;
 }
 
-void printOwners(MemBlock *head) {
-  MemBlock *it = head;
-  while (it != NULL) {
-    // Print owner name, or '.' if none.
-    printf(it->owner == HOLE ? "." : it->owner);
-
-    it = it->next;
-  }
-  printf("\n");
-}
-
 void freeList(MemBlock *head) {
   MemBlock *temp;
   while (head != NULL) {

@@ -43,9 +43,6 @@ bool fitAfter(MemBlock *prevBlock, MemBlock *newBlock);
 // If they're the same size, the newBlock pointer will be freed!
 bool fitIntoHole(MemBlock *hole, MemBlock *newBlock);
 
-// (Replaced empty space with a '.')
-void printOwners(MemBlock *head);
-
 void freeList(MemBlock *head);
 
 #endif // MEMLIST_H

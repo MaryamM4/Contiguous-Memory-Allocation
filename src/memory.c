@@ -134,7 +134,23 @@ void free(ProcessName p_name) {
 }
 
 // Show the state of the memory pool.
-void show_state() { printOwners(g_head); }
+void show_state() {
+  MemBlock *it = g_head;
+
+  while (it != NULL) {
+    if (it->owner == HOLE) {
+      for (int i = 0; i < it->size; i++) {
+        printf(".");
+      }
+
+    } else {
+      printf("%c", it->owner);
+    }
+
+    it = it->next;
+  }
+  printf("\n");
+}
 
 // Read the script in the file and execute each command.
 // <filename> should end with ".txt", eg: "MEMO.TXT".
@@ -143,7 +159,19 @@ void read(char *filename);
 // Compact the memory pool, sliding all allocations to lower
 // addresses to they become one contigous block,
 // and so all free spaces lie the right as one contigous block.
-void compact();
+void compact() {
+  MemBlock *it = g_head;
+  MemBlock *nonhole_tail;
+
+  while (it != NULL) {
+    nonhole_tail = it;
+
+    while (it->owner == HOLE) {
+    }
+
+    it = it->next;
+  }
+}
 
 void exit() {
   freeList(g_head);
