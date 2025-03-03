@@ -36,7 +36,7 @@ Please see https://github.com/MaryamM4/Contiguous-Memory-Allocation.git
 
 ## Output
 For the input script s1.txt:
-'''
+```
 A A 10 F
 A X 10 F
 A B 10 F
@@ -53,7 +53,7 @@ A H 1 W
 S
 C
 E
-'''
+```
 
 the output is:
 ![](docs/s1_output.png)
