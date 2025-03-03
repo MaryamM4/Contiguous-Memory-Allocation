@@ -7,11 +7,10 @@
 
 #define HOLE '\0'
 
-typedef struct {
+typedef struct MemBlock {
   char owner;
   int size;
-
-  MemBlock *next;
+  struct MemBlock *next;
 } MemBlock;
 
 // ==============

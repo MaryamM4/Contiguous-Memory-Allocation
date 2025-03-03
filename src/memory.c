@@ -3,6 +3,8 @@
 MemBlock *g_head = NULL;
 MemBlock *waiting_queue = NULL;
 
+void init() { g_head = initHole(MEMSIZE); }
+
 // Alocate <size> bytes for process <p_name> using algorithm <algo>.
 void allocate(ProcessName p_name, int size, Algo algo) {
   if (size > MEMSIZE) {
@@ -34,7 +36,7 @@ void allocate(ProcessName p_name, int size, Algo algo) {
       break;
 
     default:
-      printf("allocate ERROR: Invalid algo %s\n", algo);
+      printf("allocate ERROR: Invalid algo %c\n", algo);
     }
   }
 }
@@ -122,7 +124,7 @@ void addToWaitingQueue(MemBlock *block) {
 }
 
 // Free all the allocations owned by process <p_name>.
-void free(ProcessName p_name) {
+void free_process_allocations(ProcessName p_name) {
   MemBlock *it = g_head;
 
   while (it != NULL) {
@@ -136,15 +138,13 @@ void free(ProcessName p_name) {
 // Show the state of the memory pool.
 void show_state() {
   MemBlock *it = g_head;
+  char owner;
 
   while (it != NULL) {
-    if (it->owner == HOLE) {
-      for (int i = 0; i < it->size; i++) {
-        printf(".");
-      }
+    owner = (it->owner == HOLE) ? '.' : it->owner;
 
-    } else {
-      printf("%c", it->owner);
+    for (int i = 0; i < it->size; i++) {
+      printf("%c", owner);
     }
 
     it = it->next;
@@ -161,7 +161,7 @@ void read_script(char *filename) {
     return;
   }
 
-  Command command;
+  char command;
   char line[10]; // A line shouldn't be > 8
 
   while (fgets(line, sizeof(line), file)) {
@@ -174,13 +174,15 @@ void read_script(char *filename) {
     }
 
     switch (command) {
-    case ALLOCATE: {
+    case 'A': {
       char p_name, p_algo;
       int count, p_size;
 
       count = sscanf(line, " %*c %c %d %c", &p_name, &p_size, &p_algo);
       if (count < 3) {
-        fprintf("read() Error parsing parameters for command A in line: %s\n",
+        fprintf(stderr,
+                "read_script() Error parsing parameters for command A in line: "
+                "%s\n",
                 line);
         break;
       }
@@ -189,36 +191,45 @@ void read_script(char *filename) {
       break;
     }
 
-    case FREE_PROCESS_ALLOCATIONS: {
+    case 'F': {
       char p_name;
       int count = sscanf(line, " %*c %c", &p_name);
 
       if (count < 1) {
-        fprintf("read() Error parsing parameters for command A in line: %s\n",
+        fprintf(stderr,
+                "read() Error parsing parameters for command A in line: %s\n",
                 line);
         break;
       }
 
-      free(p_name);
+      free_process_allocations(p_name);
       break;
     }
 
-    case SHOW_MEM:
+    case 'S':
       show_state();
       break;
 
-    case COMPACT_MEM:
+    case 'C':
       compact();
       break;
 
-    case EXIT:
-      exit();
+    case 'E':
+      exit_mem();
       break;
 
     default:
-      fprintf("read() encountered unrecognized command: %c\n", command);
+      fprintf(
+          stderr,
+          "read_script() Error parsing parameters for command A in line: %s\n",
+          line);
       break;
     }
+
+    fprintf(stderr, "Current line: %s", line); // Remove me
+    printf("Current state: ");
+    show_state();
+    printf("\n");
   }
 
   fclose(file);
@@ -229,38 +240,53 @@ void read_script(char *filename) {
 // and so all free spaces lie the right as one contigous block.
 void compact() {
   MemBlock *it = g_head;
-  MemBlock *to_del;
+  MemBlock *prev = NULL;
   int hole_size = 0;
 
   while (it != NULL) {
-    if (it->next == NULL) { // Reached end.
-      if (it->owner == HOLE) {
-        it->size += hole_size;
+    if (it->owner == HOLE) {
+      hole_size += it->size; // Remember for end.
+
+      if (prev) {
+        prev->next = it->next;
 
       } else {
-        it->next = (MemBlock *)initHole(hole_size);
+        // Handle first node being a hole.
+        g_head = it->next;
       }
-      break;
 
-    } else { // Check for hole.
+      // Delete hole.
+      MemBlock *to_del = it;
+      it = it->next;
+      free(to_del);
 
-      if (it->owner == HOLE) {
-        // Remember how much empty space is left.
-        hole_size += it->size;
-
-        // Remove hole.
-        to_del = it;
-        it = it->next;
-        free(to_del);
-
-      } else {
-        it = it->next;
-      }
+    } else { // Not a hole. Normal iteration.
+      prev = it;
+      it = it->next;
     }
+  }
+
+  // Add a ode to store hole at end.
+  if (prev) {
+    prev->next = initHole(hole_size);
+  } else {
+    g_head = initHole(hole_size);
   }
 }
 
-void exit() {
+void exit_mem() {
   freeList(g_head);
   freeList(waiting_queue);
+}
+
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+    return EXIT_FAILURE;
+  }
+
+  init();
+  read_script(argv[1]);
+
+  return EXIT_SUCCESS;
 }

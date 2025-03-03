@@ -6,18 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define KByte 1024           // bytes
-#define MEMSIZE (80 * KByte) // KBytes
+#define MEMSIZE 80 // KBytes
 
 typedef char ProcessName;
 
-typedef enum {
-  ALLOCATE = 'A',
-  FREE_PROCESS_ALLOCATIONS = 'F',
-  SHOW_MEM = 'S',
-  COMPACT_MEM = 'C',
-  EXIT = 'E'
-} Command;
 typedef enum { FIRST_FIT = 'F', BEST_FIT = 'B', WORST_FIT = 'W' } Algo;
 
 // Global Head for memory list.
@@ -38,7 +30,7 @@ void allocateWorstFit(MemBlock *block); // Largest hole that fits.
 void addToWaitingQueue(MemBlock *block); // If no hole fits & size <= MEMSIZE.
 
 // Free all the allocations owned by process <p_name>.
-void free(ProcessName p_name);
+void free_process_allocations(ProcessName p_name);
 
 // Show the state of the memory pool.
 void show_state();
@@ -52,6 +44,6 @@ void read_script(char *filename);
 // and so all free spaces lie the right as one contigous block.
 void compact();
 
-void exit();
+void exit_mem();
 
 #endif // MEMORY_H

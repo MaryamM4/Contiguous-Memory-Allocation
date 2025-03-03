@@ -21,7 +21,7 @@ MemBlock *initBlock(char owner, int size) {
 MemBlock *initHole(int size) {
   MemBlock *newBlock = (MemBlock *)malloc(sizeof(MemBlock));
   if (newBlock == NULL) {
-    printf("initBlock ERROR: Failed to allocate memory for MemBlock.\n");
+    printf("initHole ERROR: Failed to allocate memory for MemBlock.\n");
     return NULL;
   }
 
@@ -37,7 +37,7 @@ MemBlock *initHole(int size) {
 void convertToHole(MemBlock *block) {
   block->owner = HOLE;
 
-  if (block->next && block->next->owner == HOLE) {
+  if (block->next != NULL && (block->next)->owner == HOLE) {
     block->size += block->next->size;
 
     MemBlock *to_del = block->next;
@@ -68,6 +68,11 @@ void insertEnd(MemBlock *head, MemBlock *newBlock) {
 }
 
 void insertAfter(MemBlock *prevBlock, MemBlock *newBlock) {
+  if (!prevBlock) {
+    printf("insertAfter ERROR: prevBlock is NULL.\n");
+    return;
+  }
+
   newBlock->next = prevBlock->next;
   prevBlock->next = newBlock;
 }
@@ -80,8 +85,15 @@ bool fitAfter(MemBlock *prevBlock, MemBlock *newBlock) {
     return false; // Not enough free space.
   }
 
-  prevBlock->next->size -= newBlock->size;
-  insertAfter(prevBlock, newBlock);
+  if (prevBlock->next->size == newBlock->size) {
+    prevBlock->next->owner = newBlock->owner;
+    free(newBlock);
+
+  } else {
+    prevBlock->next->size -= newBlock->size;
+    insertAfter(prevBlock, newBlock);
+  }
+
   return true;
 }
 
