@@ -1,5 +1,8 @@
 #include "memory.h"
 
+// If true, prints line and memory state for each line.
+bool verbose = false;
+
 MemBlock *g_head = NULL;
 MemBlock *waiting_queue = NULL;
 
@@ -226,10 +229,13 @@ void read_script(char *filename) {
       break;
     }
 
-    fprintf(stderr, "Current line: %s", line); // Remove me
-    printf("Current state: ");
-    show_state();
-    printf("\n");
+    // Verbose
+    if (verbose) {
+      fprintf(stderr, "Current line: %s", line);
+      printf("Current state: ");
+      show_state();
+      printf("\n");
+    }
   }
 
   fclose(file);
